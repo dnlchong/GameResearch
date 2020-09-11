@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Snake</title>
+  <style>
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+  .banner {
+	position: absolute;
+    top: 10px;
+    left: 37.5%;
+    font-size: 30 px;
+    text-align: center;
+    background-color: #700c12;
+    color: #d5d6c0;
+    width: 400px;
+  }
+  .topleft {
+    position: absolute;
+    top: 105px;
+    left: 37.5%;
+    text-align: center;
+    font-size: 40px;
+  }
+
+  .bottom{
+    position: absolute;
+    top: 580px;
+    left: 37.5%;
+    font-size: 20px;
+    text-align: center;
+    text-align-last: center;
+    text-align-last: center;
+    width: 400px;
+
+  }
+    .highscore {
+    position: absolute;
+    top: 105px;
+    left: 57.5%;
+    text-align: center;
+    font-size: 40px;
+  }
+  body {
+    background: #2b1b26;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  h2 {
+    color: white;
+    font-family: 'Century Gothic';
+    font-size: '40px';
+  }
+  canvas {
+    border: 1px solid white;
+    position: absolute;
+    top: 170px;
+    left: 37.5%;
+    display: inline;
+  }
+  .button {
+background-color: #700c12;
+border: none;
+color: #d5d6c0;
+padding: 15px 37px;
+text-align: center;
+text-decoration: none;
+position: absolute;
+top: 700px;
+left: 37.5%;
+font-weight: bold;
+font-size: 16px;
+margin: 4px 2px;
+cursor: pointer;
+}
+  </style>
+  <h2>
+  <div class="banner">Please play honestly. Your <br> actions on this screen <br> are being tracked.  </div>
+  <div class="topleft">High Score: </div>
+  <div class = "highscore" type = 'text' id = 'counter'></div>
+  <div class="bottom">Control the snake with <br>your arrow keys. <br> Get a high score of 20 for <br> a chance at a <b>$25 Amazon <br> Gift Card!</div>
+<input type="button" class="button" value="Click this button to cheat through the game." onclick="changeC()">
+  </h2>
+</head>
+<body>
+<canvas width="400" height="400" id="game"></canvas>
+<script>
+var counter = 0
+var canvas = document.getElementById('game');
+var context = canvas.getContext('2d');
+var grid = 16;
+var count = 0;
+
+var snake = {
+  x: 160,
+  y: 160,
+
+  // snake velocity. moves one grid length every frame in either the x or y direction
+  dx: grid,
+  dy: 0,
+
+  // keep track of all grids the snake body occupies
+  cells: [],
+
+  // length of the snake. grows when eating an apple
+  maxCells: 4
+};
+var apple = {
+  x: 320,
+  y: 320
+};
+
+// get random whole numbers in a specific range
+// @see https://stackoverflow.com/a/1527820/2124254
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+function change(){
+    location.href = '09128s'
+}
+function changeC(){
+    location.href = '1238s'
+}
+
+// game loop
+function loop() {
+  requestAnimationFrame(loop);
+  // slow game loop to 15 fps instead of 60 (60/15 = 4)
+  if (++count < 2.5) {
+    return;
+  }
+  count = 0;
+  context.clearRect(0,0,canvas.width,canvas.height);
+  // move snake by it's velocity
+  snake.x += snake.dx;
+  snake.y += snake.dy;
+
+  // wrap snake position horizontally on edge of screen
+  if (snake.x < 0) {
+      snake.x = 160;
+      snake.y = 160;
+      snake.cells = [];
+      snake.maxCells = 4;
+      snake.dx = grid;
+      snake.dy = 0;
+      apple.x = getRandomInt(0, 25) * grid;
+      apple.y = getRandomInt(0, 25) * grid;
+  }
+  else if (snake.x >= canvas.width) {
+    	snake.x = 0;
+			snake.x = 160;
+      snake.y = 160;
+      snake.cells = [];
+      snake.maxCells = 4;
+      snake.dx = grid;
+      snake.dy = 0;
+      apple.x = getRandomInt(0, 25) * grid;
+      apple.y = getRandomInt(0, 25) * grid;
+  }
+  // wrap snake position vertically on edge of screen
+  if (snake.y < 0) {
+    snake.x = 160;
+      snake.y = 160;
+      snake.cells = [];
+      snake.maxCells = 4;
+      snake.dx = grid;
+      snake.dy = 0;
+      apple.x = getRandomInt(0, 25) * grid;
+      apple.y = getRandomInt(0, 25) * grid;
+  }
+  else if (snake.y >= canvas.height) {
+    snake.x = 160;
+      snake.y = 160;
+      snake.cells = [];
+      snake.maxCells = 4;
+      snake.dx = grid;
+      snake.dy = 0;
+      apple.x = getRandomInt(0, 25) * grid;
+      apple.y = getRandomInt(0, 25) * grid;
+  }
+  // keep track of where snake has been. front of the array is always the head
+  snake.cells.unshift({x: snake.x, y: snake.y});
+  // remove cells as we move away from them
+  if (snake.cells.length > snake.maxCells) {
+    snake.cells.pop();
+  }
+  // draw apple
+  context.fillStyle = 'red';
+  context.fillRect(apple.x, apple.y, grid-1, grid-1);
+  // draw snake one cell at a time
+  context.fillStyle = 'green';
+  snake.cells.forEach(function(cell, index) {
+
+    // drawing 1 px smaller than the grid creates a grid effect in the snake body so you can see how long it is
+    context.fillRect(cell.x, cell.y, grid-1, grid-1);
+    // snake ate apple
+    if (cell.x === apple.x && cell.y === apple.y) {
+      snake.maxCells++;
+      // canvas is 400x400 which is 25x25 grids
+      apple.x = getRandomInt(0, 25) * grid;
+      apple.y = getRandomInt(0, 25) * grid;
+    }
+    context.font = "30px Century Gothic";
+    context.fillText("Score:" + (snake.maxCells - 4),10,50);
+
+    document.getElementById("counter").innerHTML = String(counter);
+
+
+    if ((snake.maxCells-4) == 20){
+    change();
+    }
+    if ((snake.maxCells-4) > counter){
+    counter = (snake.maxCells-4);
+    document.getElementById("counter").innerHTML = String(snake.maxCells-4);
+    }
+
+
+    // check collision with all cells after this one (modified bubble sort)
+    for (var i = index + 1; i < snake.cells.length; i++) {
+
+      // snake occupies same space as a body part. reset game
+      if (cell.x === (snake.cells[i].x) && cell.y === (snake.cells[i].y)) {
+
+          snake.x = 160;
+          snake.y = 160;
+          snake.cells = [];
+          snake.maxCells = 4;
+          snake.dx = grid;
+          snake.dy = 0;
+          apple.x = getRandomInt(0, 25) * grid;
+          apple.y = getRandomInt(0, 25) * grid;
+
+      }
+    }
+  });
+}
+// listen to keyboard events to move the snake
+function left(){
+    snake.dx = -grid;
+    snake.dy = 0;
+}
+function right(){
+    snake.dx = grid;
+    snake.dy = 0;
+}function up(){
+    snake.dx = 0;
+    snake.dy = grid;
+}function down(){
+    snake.dx = 0;
+    snake.dy = -grid;
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.which === 37 && snake.dx === 0) {
+left();
+  }
+  else if (e.which === 39 && snake.dx === 0) {
+right();
+  }
+  // up arrow key
+  else if (e.which === 38 && snake.dy === 0) {
+down();
+
+  }
+  // right arrow key
+  // down arrow key
+  else if (e.which === 40 && snake.dy === 0) {
+up();
+
+  }
+});
+
+// start the game
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
